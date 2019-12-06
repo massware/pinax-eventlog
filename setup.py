@@ -82,7 +82,11 @@ setup(
     ],
     install_requires=[
         "django>=1.11",
-        "jsonfield>=2.0.2"
+        "six",
+        'django-jsonfield'
+    ],
+    dependency_links=[
+        'git+https://github.com/massware/django-jsonfield.git#egg=django-jsonfield',
     ],
     tests_require=[
     ],
