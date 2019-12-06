@@ -4,13 +4,24 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
 
-import jsonfield
-
 from .signals import event_logged
+
+try:  # Very ugly style, but we need to get JSONField some how
+    from django.contrib.postgres.fields import JSONField
+except ImportError:  # Postgres
+    try:
+        from django_mysql.models import JSONField
+    except ImportError:  # MySQL
+        try:
+            from django_extensions.db.fields.json import JSONField
+        except ImportError:  # Django extensions which is great!
+            try:
+                from jsonfield import JSONField
+            except ImportError:  # Last but not least!
+                print("Please install a jsonfield dependency")
 
 
 class Log(models.Model):
-
     user = models.ForeignKey(
         getattr(settings, "AUTH_USER_MODEL", "auth.User"),
         null=True,
@@ -21,7 +32,7 @@ class Log(models.Model):
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.SET_NULL)
     object_id = models.PositiveIntegerField(null=True)
     obj = GenericForeignKey("content_type", "object_id")
-    extra = jsonfield.JSONField()
+    extra = JSONField()
 
     @property
     def template_fragment_name(self):
